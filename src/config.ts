@@ -57,7 +57,15 @@ export const GEMINI_API_KEY = process.env.GEMINI_API_KEY as string;
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY as string;
 export const JINA_API_KEY = process.env.JINA_API_KEY as string;
 export const BRAVE_API_KEY = process.env.BRAVE_API_KEY as string;
-export const SEARCH_PROVIDER: 'brave' | 'jina' | 'duck' = 'jina';
+export const TAVILY_API_KEY = process.env.TAVILY_API_KEY || '';
+
+// Determine search provider based on available API keys
+// Priority: Tavily > Brave > DuckDuckGo
+export const SEARCH_PROVIDER: 'tavily' | 'brave' | 'jina' | 'duck' = 
+  TAVILY_API_KEY ? 'tavily' : 
+  (BRAVE_API_KEY ? 'brave' : 
+  (JINA_API_KEY ? 'jina' : 'duck'));
+
 export const LLM_PROVIDER: LLMProvider = (() => {
   const provider = process.env.LLM_PROVIDER || 'gemini';
   if (!isValidProvider(provider)) {

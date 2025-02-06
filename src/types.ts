@@ -151,3 +151,16 @@ export interface TrackerContext {
   tokenTracker: TokenTracker;
   actionTracker: ActionTracker;
 }
+
+export interface TavilySearchResponse {
+  results: {
+    title: string;
+    url: string;
+    content: string;
+    score: number;
+    published_date?: string;
+  }[];
+  query: string;
+  search_depth?: string;
+  max_results?: number;
+}

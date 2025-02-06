@@ -34,6 +34,7 @@
     "axios": "^1.7.9",
     "commander": "^13.1.0",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "duck-duck-scrape": "^2.2.7",
     "express": "^4.21.2",
     "node-fetch": "^3.3.2",

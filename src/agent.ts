@@ -15,6 +15,7 @@ import {ActionTracker} from "./utils/action-tracker";
 import {StepAction, AnswerAction} from "./types";
 import {TrackerContext} from "./types";
 import {jinaSearch} from "./tools/jinaSearch";
+import { getHistoryDir, saveToHistory, saveTextToHistory } from './utils/history';
 
 async function sleep(ms: number) {
   const seconds = Math.ceil(ms / 1000);
@@ -274,6 +275,13 @@ export async function getResponse(question: string, tokenBudget: number = 1_000_
     tokenTracker: existingContext?.tokenTracker || new TokenTracker(tokenBudget),
     actionTracker: existingContext?.actionTracker || new ActionTracker()
   };
+  // Create history directory at the beginning of the query
+  const historyDir = getHistoryDir(question);
+  
+  // Initialize prompt.txt with the initial question
+  const initialPrompt = getPrompt(question, [], [], true, true, true, true);
+  saveTextToHistory(historyDir, 'prompt.txt', initialPrompt);
+
   context.actionTracker.trackAction({gaps: [question], totalStep: 0, badAttempts: 0});
   let step = 0;
   let totalStep = 0;
@@ -645,10 +653,29 @@ You decided to think out of the box or cut from a completely different angle.`);
       }
     }
 
-    await storeContext(prompt, [allContext, allKeywords, allQuestions, allKnowledge], totalStep);
+    // Save results to history directory using the same historyDir
+    saveToHistory(historyDir, 'context.json', allContext);
+    saveToHistory(historyDir, 'queries.json', allKeywords);
+    saveToHistory(historyDir, 'questions.json', allQuestions);
+    saveToHistory(historyDir, 'knowledge.json', allKnowledge);
+    saveTextToHistory(historyDir, `prompt-${step}.txt`, prompt);
+    // Update prompt.txt with the full conversation history
+    const fullPrompt = getPrompt(
+      question,
+      diaryContext,
+      allQuestions,
+      allowReflect,
+      allowAnswer,
+      allowRead,
+      allowSearch,
+      badContext,
+      allKnowledge,
+      allURLs,
+      false
+    );
+    saveTextToHistory(historyDir, 'prompt.txt', fullPrompt);
   }
 
-  await storeContext(prompt, [allContext, allKeywords, allQuestions, allKnowledge], totalStep);
   if (isAnswered) {
     return {result: thisStep, context};
   } else {
@@ -689,26 +716,20 @@ You decided to think out of the box or cut from a completely different angle.`);
     }
     context.tokenTracker.trackUsage('agent', totalTokens);
 
-    await storeContext(prompt, [allContext, allKeywords, allQuestions, allKnowledge], totalStep);
+    // Save the beast mode prompt
+    saveToHistory(historyDir, 'context.json', allContext);
+    saveToHistory(historyDir, 'queries.json', allKeywords);
+    saveToHistory(historyDir, 'questions.json', allQuestions);
+    saveToHistory(historyDir, 'knowledge.json', allKnowledge);
+    saveTextToHistory(historyDir, `prompt-${step}.txt`, prompt);
+    // Update prompt.txt with the final beast mode conversation
+    saveTextToHistory(historyDir, 'prompt.txt', prompt);
+
     thisStep = object as StepAction;
     console.log(thisStep)
     return {result: thisStep, context};
   }
 }
-
-async function storeContext(prompt: string, memory: any[][], step: number) {
-  try {
-    await fs.writeFile(`prompt-${step}.txt`, prompt);
-    const [context, keywords, questions, knowledge] = memory;
-    await fs.writeFile('context.json', JSON.stringify(context, null, 2));
-    await fs.writeFile('queries.json', JSON.stringify(keywords, null, 2));
-    await fs.writeFile('questions.json', JSON.stringify(questions, null, 2));
-    await fs.writeFile('knowledge.json', JSON.stringify(knowledge, null, 2));
-  } catch (error) {
-    console.error('Context storage failed:', error);
-  }
-}
-
 
 export async function main() {
   const question = process.argv[2] || "";
