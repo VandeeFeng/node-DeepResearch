@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepResearch</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Add Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-section">
+            <form id="searchForm" class="search-form">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Ask anything..." 
+                    autocomplete="off"
+                    aria-label="Search query"
+                >
+                <button type="submit">
+                    <span>Search</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-section">
+            <!-- Chat/Results Area -->
+            <div class="chat-area" id="chatArea">
+                <div class="welcome-message">
+                    <h2>Open DeepResearch</h2>
+                    <p>Ask any question with AI-powered deep research</p>
+                </div>
+            </div>
+
+            <!-- References Panel -->
+            <div class="references-panel" id="referencesPanel">
+                <div class="references-header">
+                    <h3>References</h3>
+                </div>
+                <div class="references-content" id="referencesContent">
+                    <!-- References will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar" id="statusBar">
+            <div class="token-usage">
+                <span>Tokens Used: </span>
+                <span id="tokenCount">0</span>
+            </div>
+            <div class="step-counter">
+                <span>Current Step: </span>
+                <span id="stepCount">0</span>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html> 

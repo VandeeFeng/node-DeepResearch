@@ -13,6 +13,7 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
 const eventEmitter = new EventEmitter();
 
@@ -60,13 +61,17 @@ function cleanup(requestId: string) {
 }
 
 function emitTrackerUpdate(requestId: string, context: TrackerContext) {
+  const state = context.actionTracker.getState();
   const trackerData = {
     tokenUsage: context.tokenTracker.getTotalUsage(),
     tokenBreakdown: context.tokenTracker.getUsageBreakdown(),
-    actionState: context.actionTracker.getState().thisStep,
-    step: context.actionTracker.getState().totalStep,
-    badAttempts: context.actionTracker.getState().badAttempts,
-    gaps: context.actionTracker.getState().gaps
+    actionState: {
+      ...state.thisStep,
+      step: state.totalStep
+    },
+    step: state.totalStep,
+    badAttempts: state.badAttempts,
+    gaps: state.gaps
   };
 
   eventEmitter.emit(`progress-${requestId}`, {
